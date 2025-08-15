@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Fraud Detection</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-dark text-white">
+  <div class="container p-4 mt-4 bg-gradient rounded-4 border border-light">
+    <h2 class="text-center mb-4"><img src="{{ url_for('static', filename='images/logo.png') }}" width="40" height="40" alt="Logo">
+ Credit Card Fraud Detector</h2>
+
+    <form action="/predict" method="post" class="row g-3 " id="fraudForm">
+      {% for label, name in [('Merchant', 'merchant'), ('Category', 'category'), ('Amount', 'amt'), 
+                       ('Gender', 'gender'), ('City', 'city'), ('State', 'state'), 
+                       ('Job', 'job'), ('Zip', 'zip'), ('City Pop', 'city_pop'), 
+                       ('Age', 'age'), ('Hour', 'hour'), ('Day', 'day'), ('Weekday', 'weekday')] %}
+        <div class="col-md-4">
+          {% if name in ['merchant', 'category', 'state'] %}
+            <label>{{ label }}</label>
+            <select class="form-select" name="{{ name }}" required>
+              {% for option in merchants if name=='merchant' %}
+              <option>{{ option }}</option>
+              {% endfor %}
+              {% for option in categories if name=='category' %}
+              <option>{{ option }}</option>
+              {% endfor %}
+              {% for option in states if name=='state' %}
+              <option>{{ option }}</option>
+              {% endfor %}
+            </select>
+          {% elif name == 'gender' %}
+            <label>{{ label }}</label>
+            <select class="form-select" name="gender" required>
+              <option>F</option>
+              <option>M</option>
+            </select>
+          {% else %}
+            <label>{{ label }}</label>
+            <input type="text" name="{{ name }}" class="form-control" required>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <div class="mt-5 md-5 d-flex justify-content-center align-items-center">
+        <button type="submit" style="background-color: #00ff04;" class="btn px-5 py-2 mt-3 text-white">Predict</button>
+        <button type="reset" style="background-color: #f32c00;" class="btn btn-warning px-4 py-2 mt-3 ms-2 text-white">Reset</button>
+        <select id="exampleSelector" class="form-select w-auto d-inline-block py-2 mt-3 ms-2" onchange="autoFillExample(this.value)">
+          <option value="">🔽 Load Example</option>
+          <option value="example1">Ex 1 (Safe)</option>
+          <option value="example2">Ex 2 (Fraud)</option>
+          <option value="example3">Ex 3 (Safe)</option>
+          <option value="example4">Ex 4 (Fraud)</option>
+        </select>
+      </div>
+    </form>
+
+    <hr class="text-white mt-5">
+
+    <h4 class="mt-4">Live Stats:</h4>
+    <p>Total Predictions: {{ stats.total }}</p>
+    <p>Safe: {{ stats.safe }} | Fraud: {{ stats.fraud }}</p>
+  </div>
+
+  <script>
+    const examples = {
+      example1: {merchant:"fraud_Hermiston-Blanda",category:"shopping_pos",amt:3.48,gender:"F",city:"Moreno Valley",state:"CA",job:"Psychologist",zip:92551,city_pop:201175,age:30,hour:6,day:10,weekday:6},
+      example2: {merchant:"fraud_Bogisich-Deckow",category:"gas_transport",amt:256.59,gender:"M",city:"Overland Park",state:"KS",job:"Scientist",zip:66212,city_pop:173372,age:45,hour:1,day:27,weekday:5},
+      example3: {merchant:"fraud_Kihn-Gleichner",category:"shopping_net",amt:5.79,gender:"F",city:"Hampton",state:"VA",job:"Engineer",zip:23669,city_pop:137436,age:27,hour:9,day:6,weekday:1},
+      example4: {merchant:"fraud_Mosciski-Swaniawski",category:"grocery_pos",amt:267.18,gender:"M",city:"Salinas",state:"CA",job:"Teacher",zip:93905,city_pop:155662,age:40,hour:2,day:22,weekday:2}
+      };
+
+    function autoFillExample(key) {
+      if (!examples[key]) return;
+      const data = examples[key];
+      for (let field in data) {
+        const input = document.querySelector(`[name="${field}"]`);
+        if (input) input.value = data[field];
+      }
+    }
+  </script>
+</body>
+</html>
